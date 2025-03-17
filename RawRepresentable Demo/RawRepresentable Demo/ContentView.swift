@@ -30,6 +30,10 @@ struct ContentView: View {
       }
       .navigationTitle("Settings")
     }
+    .onAppear {
+      // Location of UserDefault (AppStorage)
+      print(URL.libraryDirectory.appending(path: "Preferences").path())
+    }
   }
 }
 
