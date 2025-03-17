@@ -79,6 +79,7 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
+				ORGANIZATIONNAME = Blacenova;
 				TargetAttributes = {
 					FDC351322D87FEDF00D6C396 = {
 						CreatedOnToolsVersion = 16.2;
