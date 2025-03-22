@@ -29,14 +29,19 @@ class Book {
    2 ways of Light weight migration -
    a. If it is reuired value, then do Lightweight migration when new property added with a value, so it is recommended to put that value, eg empty string ("") in property as well as in init().
    b. If the new property is optional eg, var recommendedBy: String?, then in init() give: recommendedBy: String? = nil. So there will be no crash.
-  */
+   */
+  
+  @Relationship(deleteRule: .cascade) // cascade - A rule that deletes any related models; By default nullify will be applicable.
+  var quotes: [Quote]?
+  @Relationship(inverse: \Genre.books)
+  var genres: [Genre]?
   
   init(
     title: String,
     author: String,
-    dateAdded: Date = .now,
-    dateStarted: Date = .distantPast,
-    dateCompleted: Date = .distantPast,
+    dateAdded: Date = Date.now,
+    dateStarted: Date = Date.distantPast,
+    dateCompleted: Date = Date.distantPast,
     synopsis: String = "",
     rating: Int? = nil,
     status: Status = .onShelf,
@@ -65,9 +70,12 @@ class Book {
   }
 }
 
+
 enum Status: Int, Codable, Identifiable, CaseIterable {
   case onShelf, inProgress, completed
-  var id: Self { self }
+  var id: Self {
+    self
+  }
   var descr: String {
     switch self {
       case .onShelf:

@@ -25,6 +25,7 @@ struct EditBookView: View {
   // There is a problem with dates, however though we are settings dates on onAppear(), messess up the changed computed property becoz of our onChange method. Need to remove this.
   @State private var firstView = true
   @State private var recommendedBy: String = ""
+  @State private var showGenres = false
   
     var body: some View {
       HStack {
@@ -106,6 +107,33 @@ struct EditBookView: View {
         Text("Synopsis").foregroundStyle(.secondary)
         TextEditor(text: $synopsis).padding(5)
           .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(uiColor: .tertiarySystemFill), lineWidth: 2))
+        
+        if let genres = book.genres {
+          ViewThatFits {
+            GenresStackView(genres: genres)
+            ScrollView(.horizontal, showsIndicators: false) {
+              GenresStackView(genres: genres)
+            }
+          }
+        }
+        
+        HStack {
+          Button("Genres", systemImage: "bookmark.fill") {
+            showGenres.toggle()
+          }
+          .sheet(isPresented: $showGenres) {
+            GenresView(book: book)
+          }
+          NavigationLink {
+            QuotesListView(book: book)
+          } label: {
+            let count = book.quotes?.count ?? 0
+            Label("^[\(count) Quotes](inflect: true)", systemImage: "quote.opening")
+          }
+        }
+        .buttonStyle(.bordered)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding([.horizontal, .top])
       }
       .padding()
       .textFieldStyle(.roundedBorder)

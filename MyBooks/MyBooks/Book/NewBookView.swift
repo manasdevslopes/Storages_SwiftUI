@@ -29,6 +29,7 @@ struct NewBookView: View {
         Button("Create") {
           let newBook = Book(title: title, author: author)
           context.insert(newBook)
+          try? context.save()
           dismiss()
         }
         .frame(maxWidth: .infinity, alignment: .trailing)

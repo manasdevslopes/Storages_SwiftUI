@@ -57,6 +57,14 @@ struct BookList: View {
                         }
                       }
                     }
+                    if let genres = book.genres {
+                      ViewThatFits {
+                        GenresStackView(genres: genres)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                          GenresStackView(genres: genres)
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -66,6 +74,7 @@ struct BookList: View {
             indexSet.forEach { index in
               let book = books[index]
               context.delete(book)
+              try? context.save()
             }
           }
         }
