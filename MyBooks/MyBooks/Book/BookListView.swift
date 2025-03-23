@@ -51,7 +51,18 @@ struct BookListView: View {
   }
 }
 
-#Preview {
+#Preview("English") {
+  let preview = Preview(Book.self)
+  let books = Book.sampleBooks
+  let genres = Genre.sampleGenres
+  preview.addExamples(books)
+  preview.addExamples(genres)
+  return BookListView()
+  // .modelContainer(for: Book.self, inMemory: true) // For Preview
+    .modelContainer(preview.container)
+}
+
+#Preview("German") {
   let preview = Preview(Book.self)
   let books = Book.sampleBooks
   let genres = Genre.sampleGenres
@@ -60,4 +71,5 @@ struct BookListView: View {
   return BookListView()
   // .modelContainer(for: Book.self, inMemory: true)
     .modelContainer(preview.container)
+    .environment(\.locale, Locale(identifier: "DE"))
 }

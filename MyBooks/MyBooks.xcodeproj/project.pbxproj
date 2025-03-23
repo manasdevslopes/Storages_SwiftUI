@@ -8,10 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		FD27FD082D8BF89600923FCB /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD27FD072D8BF89600923FCB /* Launch Screen.storyboard */; };
+		FD9C3F362D8EED8100B5A588 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FD9C3F352D8EED8100B5A588 /* Localizable.xcstrings */; };
+		FD9C3F382D90140B00B5A588 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = FD9C3F372D90140B00B5A588 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		FD27FD072D8BF89600923FCB /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		FD9C3F352D8EED8100B5A588 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		FD9C3F372D90140B00B5A588 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		FDFAF90B2D8AA5F9004EFBE0 /* MyBooks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyBooks.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -37,6 +41,8 @@
 		FDFAF9022D8AA5F9004EFBE0 = {
 			isa = PBXGroup;
 			children = (
+				FD9C3F352D8EED8100B5A588 /* Localizable.xcstrings */,
+				FD9C3F372D90140B00B5A588 /* InfoPlist.xcstrings */,
 				FD27FD072D8BF89600923FCB /* Launch Screen.storyboard */,
 				FDFAF90D2D8AA5F9004EFBE0 /* MyBooks */,
 				FDFAF90C2D8AA5F9004EFBE0 /* Products */,
@@ -98,6 +104,7 @@
 			knownRegions = (
 				en,
 				Base,
+				de,
 			);
 			mainGroup = FDFAF9022D8AA5F9004EFBE0;
 			minimizedProjectReferenceProxies = 1;
@@ -116,6 +123,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD9C3F382D90140B00B5A588 /* InfoPlist.xcstrings in Resources */,
+				FD9C3F362D8EED8100B5A588 /* Localizable.xcstrings in Resources */,
 				FD27FD082D8BF89600923FCB /* Launch Screen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -192,6 +201,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -248,6 +258,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
