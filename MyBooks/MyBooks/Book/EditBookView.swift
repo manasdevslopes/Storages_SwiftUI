@@ -7,14 +7,16 @@
 // Copyright © 2025 Blacenova. All rights reserved.
 // ------------------------------------------------------------------------
 //
-    
+
 
 import SwiftUI
+import PhotosUI
 
 struct EditBookView: View {
   @Environment(\.dismiss) private var dismiss
+  @Environment(\.modelContext) private var modelContext
   let book: Book
-  @State private var status = Status.onShelf
+  @State private var status: Status
   @State private var rating: Int?
   @State private var title = ""
   @State private var author = ""
@@ -22,81 +24,113 @@ struct EditBookView: View {
   @State private var dateAdded = Date.distantPast
   @State private var dateStarted = Date.distantPast
   @State private var dateCompleted = Date.distantPast
-  // There is a problem with dates, however though we are settings dates on onAppear(), messess up the changed computed property becoz of our onChange method. Need to remove this.
-  @State private var firstView = true
   @State private var recommendedBy: String = ""
   @State private var showGenres = false
+  @State private var selectedBookCover: PhotosPickerItem?
+  @State private var selectedBookCoverData: Data?
   
-    var body: some View {
-      HStack {
-        Text("Status")
-        Picker("Status", selection: $status) {
-          ForEach(Status.allCases) { status in
-            Text(status.descr).tag(status)
-          }
+  init(book: Book) {
+    self.book = book
+    _status = State(initialValue: Status(rawValue: book.status)!)
+  }
+  
+  var body: some View {
+    HStack {
+      Text("Status")
+      Picker("Status", selection: $status) {
+        ForEach(Status.allCases) { status in
+          Text(status.descr).tag(status)
         }
-        .buttonStyle(.bordered)
       }
-      VStack(alignment: .leading) {
-        GroupBox {
+      .buttonStyle(.bordered)
+    }
+    VStack(alignment: .leading) {
+      GroupBox {
+        LabeledContent {
+          switch status {
+            case .onShelf:
+              DatePicker("", selection: $dateAdded, displayedComponents: .date)
+            case .inProgress, .completed:
+              DatePicker("", selection: $dateAdded, in: ...dateStarted, displayedComponents: .date)
+          }
+        } label: {
+          Text("Date Added")
+        }
+        if status == .inProgress || status == .completed {
           LabeledContent {
-            DatePicker("", selection: $dateAdded, displayedComponents: .date)
+            DatePicker("", selection: $dateStarted, in: dateAdded..., displayedComponents: .date)
           } label: {
-            Text("Date Added")
-          }
-          if status == .inProgress || status == .completed {
-            LabeledContent {
-              DatePicker("", selection: $dateStarted, in: dateAdded..., displayedComponents: .date)
-            } label: {
-              Text("Date Started")
-            }
-          }
-          if status == .completed {
-            LabeledContent {
-              DatePicker("", selection: $dateCompleted, in: dateStarted..., displayedComponents: .date)
-            } label: {
-              Text("Date Completed")
-            }
+            Text("Date Started")
           }
         }
-        .foregroundStyle(.secondary)
-        .onChange(of: status) { oldValue, newValue in
-          if !firstView {
-            if newValue == .onShelf {
-              dateStarted = Date.distantPast
-              dateCompleted = Date.distantPast
-            } else if newValue == .inProgress && oldValue == .onShelf {
-              // Book has been started
-              dateStarted = Date.now
-            } else if newValue == .completed && oldValue == .onShelf {
-              // Forgot to start book
-              dateCompleted = Date.now
-              dateStarted = dateAdded
-            } else if newValue == .inProgress && oldValue == .completed {
-              // from completed to inProgress
-              dateCompleted = Date.distantPast
+        if status == .completed {
+          LabeledContent {
+            DatePicker("", selection: $dateCompleted, in: dateStarted..., displayedComponents: .date)
+          } label: {
+            Text("Date Completed")
+          }
+        }
+      }
+      .foregroundStyle(.secondary)
+      .onChange(of: status) { oldValue, newValue in
+        if newValue == .onShelf {
+          dateStarted = Date.distantPast
+          dateCompleted = Date.distantPast
+        } else if newValue == .inProgress && oldValue == .onShelf {
+          // Book has been started
+          dateStarted = Date.now
+        } else if newValue == .completed && oldValue == .onShelf {
+          // Forgot to start book
+          dateCompleted = Date.now
+          dateStarted = dateAdded
+        } else if newValue == .inProgress && oldValue == .completed {
+          // from completed to inProgress
+          dateCompleted = Date.distantPast
+        } else {
+          // completed
+          dateCompleted = Date.now
+        }
+      }
+      Divider()
+      ScrollView(.vertical, showsIndicators: false) {
+        PhotosPicker(selection: $selectedBookCover, matching: .images, photoLibrary: .shared()) {
+          Group {
+            if let selectedBookCoverData, let uiImage = UIImage(data: selectedBookCoverData) {
+              Image(uiImage: uiImage).resizable().scaledToFit()
             } else {
-              // completed
-              dateCompleted = Date.now
+              Image(systemName: "photo").resizable().scaledToFit().tint(.primary)
             }
-            firstView = false
+          }
+          .frame(width: 200, height: 200)
+          .overlay(alignment: .bottomTrailing) {
+            if selectedBookCoverData != nil {
+              Button {
+                selectedBookCover = nil
+                selectedBookCoverData = nil
+              } label: {
+                Image(systemName: "x.circle.fill")
+                  .foregroundStyle(.red)
+              }
+            }
           }
         }
-        Divider()
-        LabeledContent {
-          RatingsView(maxRating: 5, currentRating: $rating, width: 30, color: .red, sfSymbol: "heart")
-        } label: {
-          Text("Rating")
-        }
-        LabeledContent {
-          TextField("", text: $title)
-        } label: {
-          Text("Title").foregroundStyle(.secondary)
-        }
-        LabeledContent {
-          TextField("", text: $author)
-        } label: {
-          Text("Author").foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .center)
+        VStack {
+          LabeledContent {
+            RatingsView(maxRating: 5, currentRating: $rating, width: 30, color: .red, sfSymbol: "heart")
+          } label: {
+            Text("Rating")
+          }
+          LabeledContent {
+            TextField("", text: $title)
+          } label: {
+            Text("Title").foregroundStyle(.secondary)
+          }
+          LabeledContent {
+            TextField("", text: $author)
+          } label: {
+            Text("Author").foregroundStyle(.secondary)
+          }
         }
         LabeledContent {
           TextField("", text: $recommendedBy)
@@ -104,70 +138,78 @@ struct EditBookView: View {
           Text("Recommended by").foregroundStyle(.secondary)
         }
         Divider()
-        Text("Synopsis").foregroundStyle(.secondary)
+        Text("Synopsis").foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
         TextEditor(text: $synopsis).padding(5)
-          .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(uiColor: .tertiarySystemFill), lineWidth: 2))
-        
-        if let genres = book.genres {
-          ViewThatFits {
+          .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(uiColor: .tertiarySystemFill), lineWidth: 2)).frame(height: synopsis.count > 100 ? 500 : 100)
+      }
+      
+      if let genres = book.genres {
+        ViewThatFits {
+          GenresStackView(genres: genres)
+          ScrollView(.horizontal, showsIndicators: false) {
             GenresStackView(genres: genres)
-            ScrollView(.horizontal, showsIndicators: false) {
-              GenresStackView(genres: genres)
-            }
           }
-        }
-        
-        HStack {
-          Button("Genres", systemImage: "bookmark.fill") {
-            showGenres.toggle()
-          }
-          .sheet(isPresented: $showGenres) {
-            GenresView(book: book)
-          }
-          NavigationLink {
-            QuotesListView(book: book)
-          } label: {
-            let count = book.quotes?.count ?? 0
-            Label("\(count) Quotes", systemImage: "quote.opening")
-          }
-        }
-        .buttonStyle(.bordered)
-        .frame(maxWidth: .infinity, alignment: .trailing)
-        .padding([.horizontal, .top])
-      }
-      .padding()
-      .textFieldStyle(.roundedBorder)
-      .navigationTitle(title)
-      .navigationBarTitleDisplayMode(.inline)
-      .toolbar {
-        if changed {
-          Button("Update") {
-            book.status = status.rawValue
-            book.rating = rating
-            book.title = title
-            book.author = author
-            book.synopsis = synopsis
-            book.dateAdded = dateAdded
-            book.dateStarted = dateStarted
-            book.dateCompleted = dateCompleted
-            book.recommendedBy = recommendedBy
-            dismiss()
-          }
-          .buttonStyle(.borderedProminent)
         }
       }
-      .onAppear {
-        status = Status(rawValue: book.status)!
-        rating = book.rating
-        title = book.title
-        author = book.author
-        synopsis = book.synopsis
-        dateAdded = book.dateAdded
-        dateStarted = book.dateStarted
-        dateCompleted = book.dateCompleted
-        recommendedBy = book.recommendedBy
+      
+      HStack {
+        Button("Genres", systemImage: "bookmark.fill") {
+          showGenres.toggle()
+        }
+        .sheet(isPresented: $showGenres) {
+          GenresView(book: book)
+        }
+        NavigationLink {
+          QuotesListView(book: book)
+        } label: {
+          let count = book.quotes?.count ?? 0
+          Label("\(count) Quotes", systemImage: "quote.opening")
+        }
+      }
+      .buttonStyle(.bordered)
+      .frame(maxWidth: .infinity, alignment: .trailing)
+      .padding([.horizontal, .top])
+    }
+    .padding()
+    .textFieldStyle(.roundedBorder)
+    .navigationTitle(title)
+    .navigationBarTitleDisplayMode(.inline)
+    .toolbar {
+      if changed {
+        Button("Update") {
+          book.status = status.rawValue
+          book.rating = rating
+          book.title = title
+          book.author = author
+          book.synopsis = synopsis
+          book.dateAdded = dateAdded
+          book.dateStarted = dateStarted
+          book.dateCompleted = dateCompleted
+          book.recommendedBy = recommendedBy
+          book.bookCover = selectedBookCoverData
+          try? modelContext.save()
+          dismiss()
+        }
+        .buttonStyle(.borderedProminent)
       }
     }
+    .onAppear {
+      rating = book.rating
+      title = book.title
+      author = book.author
+      synopsis = book.synopsis
+      dateAdded = book.dateAdded
+      dateStarted = book.dateStarted
+      dateCompleted = book.dateCompleted
+      recommendedBy = book.recommendedBy
+      selectedBookCoverData = book.bookCover
+    }
+    .task(id: selectedBookCover) {
+      if let data = try? await selectedBookCover?.loadTransferable(type: Data.self) {
+        selectedBookCoverData = data
+      }
+    }
+  }
   
   /*
    Multiple cursor:
@@ -184,6 +226,7 @@ struct EditBookView: View {
     || dateStarted != book.dateStarted
     || dateCompleted != book.dateCompleted
     || recommendedBy != book.recommendedBy
+    || selectedBookCoverData != book.bookCover
   }
 }
 

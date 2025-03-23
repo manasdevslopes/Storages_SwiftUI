@@ -48,7 +48,7 @@ struct BookList: View {
                 book.icon
                 VStack {
                   VStack(alignment: .leading) {
-                    Text(book.title).font(.title2)
+                    Text(book.title).font(.title2).lineLimit(1)
                     Text(book.author).foregroundStyle(.secondary)
                     if let rating = book.rating {
                       HStack {
